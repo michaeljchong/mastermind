@@ -19,25 +19,35 @@ class Board
   end
 end
 
-Board.new.display
+class Player
+  def initialize(name)
+    @name = name
+    @points = 0
+  end
+end
 
-# Player
-#   initialize
-#     name
-#     points
+class Codemaker < Player
+  def initialize
+    super
+    @code = []
+  end
 
-# Codebreaker < Player
-#   guess
+  def generate_code
+    # @code = random pattern of 4 code pegs
+  end
+
+  def feedback(codebreaker_guess)
+    # black keypegs for correct color and location
+    # white keypegs for correct color but not location
+  end
+end
+
+class Codebreaker < Player
+  def guess
 #     input guess and check for valid input
 
-# Codemaker < Player
-#   initialize
-#     code
-#   generate_code
-#     code = random pattern of 4 code pegs
-#   feedback(codebreaker_guess)
-#     black keypegs for correct color and location
-#     white keypegs for correct color but not location
+  end
+end
 
 # Game
 #   initialize
@@ -59,3 +69,5 @@ Board.new.display
 #       play_round
 #       switch player roles
 #     declare winner
+
+Board.new.display
