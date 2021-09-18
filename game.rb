@@ -26,8 +26,8 @@ end
 
 class Player
   COLOR_PEGS = [' ', 'R', 'O', 'Y', 'G', 'B', 'P'] #empty, red, orange, yellow, green, blue, purple
-  attr_accessor :name
-  attr_reader :points
+  attr_accessor :name, :points
+
   def initialize
     @name = ''
     @points = 0
@@ -45,6 +45,7 @@ class Codemaker < Player
   end
 
   def generate_code
+    @code = []
     4.times { @code.push(COLOR_PEGS.sample) }
   end
 
@@ -70,7 +71,7 @@ class Codebreaker < Player
     while (guess = gets.chomp.split(''))
       break if guess.length == 4 && guess.all? { |value| COLOR_PEGS.include?(value) }
 
-      print 'Invalid input. Enter 4 letters (ex. RGBY)'
+      print 'Invalid input. Enter 4 letters (ex. RGBY) '
     end
     guess
   end
@@ -82,6 +83,22 @@ class Game
     @codemaker = Codemaker.new
     @codebreaker = Codebreaker.new
     @num_rounds = 2 #must be an even number
+  end
+
+  def intro
+    puts "Let's play a game of Mastermind!"
+    puts 'The available code options are red, orange, yellow, green, blue, purple. The code can also be empty.'
+    puts 'The code is 4 characters in length.'
+    puts "When guessing, enter the capitalized first letter of the color or a 'space'."
+    puts 'For example, a guess of red, green, empty, blue would look like => RG B'
+    puts "Let's begin..."
+  end
+
+  def set_names
+    print 'Who is playing? (default: Human) '
+    name = gets.chomp
+    @codebreaker.name = name.empty? ? 'Human' : name
+    @codemaker.name = 'Computer'
   end
 
   def play_round
@@ -99,11 +116,18 @@ class Game
     @codemaker.add_point
   end
 
-  def set_names
-    print 'Who is playing? (default: Human) '
-    name = gets.chomp
-    @codebreaker.name = name.empty? ? 'Human' : name
-    @codemaker.name = 'Computer'
+  def show_score
+    puts "#{@codemaker.name} - #{@codemaker.points} points."
+    puts "#{@codebreaker.name} - #{@codebreaker.points} points."
+  end
+
+  def switch_roles
+    temp_name = @codemaker.name
+    temp_points = @codemaker.points
+    @codemaker.name = @codebreaker.name
+    @codemaker.points = @codebreaker.points
+    @codebreaker.name = temp_name
+    @codebreaker.points = temp_points
   end
 
   def result
@@ -119,11 +143,12 @@ class Game
   end
 
   def play
+    intro
     set_names
     @num_rounds.times do
+      show_score
       play_round
-      @codemaker, @codebreaker = @codebreaker, @codemaker
-      p @codemaker
+      switch_roles
       @board.reset
     end
     result
