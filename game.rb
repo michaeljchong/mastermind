@@ -27,13 +27,15 @@ class Player
 end
 
 class Codemaker < Player
-  def initialize
-    super
+  COLOR_PEGS = ['', 'R', 'O', 'Y', 'G', 'B', 'P'] #empty, red, orange, yellow, green, blue, purple
+
+  def initialize(name)
+    super(name)
     @code = []
   end
 
   def generate_code
-    # @code = random pattern of 4 code pegs
+    4.times { @code.push(COLOR_PEGS.sample) }
   end
 
   def feedback(codebreaker_guess)
@@ -71,3 +73,6 @@ end
 #     declare winner
 
 Board.new.display
+player = Codemaker.new("Bob")
+player.generate_code
+p player
