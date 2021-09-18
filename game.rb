@@ -20,6 +20,7 @@ class Board
 end
 
 class Player
+  COLOR_PEGS = [' ', 'R', 'O', 'Y', 'G', 'B', 'P'] #empty, red, orange, yellow, green, blue, purple
   def initialize(name)
     @name = name
     @points = 0
@@ -27,8 +28,6 @@ class Player
 end
 
 class Codemaker < Player
-  COLOR_PEGS = ['', 'R', 'O', 'Y', 'G', 'B', 'P'] #empty, red, orange, yellow, green, blue, purple
-
   def initialize(name)
     super(name)
     @code = []
@@ -38,13 +37,13 @@ class Codemaker < Player
     4.times { @code.push(COLOR_PEGS.sample) }
   end
 
-  def feedback(codebreaker_guess)
+  def feedback(guess)
     black_pegs = 0
     white_pegs = 0
     @code.each_with_index do |peg, idx|
-      if peg == codebreaker_guess[idx]
+      if peg == guess[idx]
         black_pegs += 1
-      elsif @code.include?(codebreaker_guess[idx])
+      elsif @code.include?(guess[idx])
         white_pegs += 1
       end
     end
@@ -55,8 +54,13 @@ end
 
 class Codebreaker < Player
   def guess
-#     input guess and check for valid input
+    print 'What do you think the code is? Enter 4 letters (ex. RGBY) '
+    while (guess = gets.chomp.split(''))
+      break if guess.length == 4 && guess.all? { |value| COLOR_PEGS.include?(value) }
 
+      print 'Invalid input. Enter 4 letters (ex. RGBY)'
+    end
+    guess
   end
 end
 
@@ -86,3 +90,5 @@ maker = Codemaker.new("Bob")
 maker.generate_code
 p maker
 p maker.feedback(["R", "R", "G", "B"])
+breaker = Codebreaker.new("Joe")
+breaker.guess
