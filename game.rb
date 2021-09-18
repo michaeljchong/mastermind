@@ -26,22 +26,47 @@ end
 
 class Player
   COLOR_PEGS = [' ', 'R', 'O', 'Y', 'G', 'B', 'P'] #empty, red, orange, yellow, green, blue, purple
+  attr_reader :is_computer
   attr_accessor :name, :points
 
   def initialize
-    @name = ''
+    @name = 'Computer'
     @points = 0
+    @is_computer = TRUE
   end
 
   def add_point
     @points += 1
   end
+
+  def input_code
+    while (input = gets.chomp.split(''))
+      break if input.length == 4 && input.all? { |value| COLOR_PEGS.include?(value) }
+
+      print 'Invalid input. Enter 4 letters (ex. RGBY) '
+    end
+    input
+  end
+
+  def switch_computer_state
+    @is_computer = @is_computer ? FALSE : TRUE
+  end
 end
 
 class Codemaker < Player
   def generate_code
-    @code = []
-    4.times { @code.push(COLOR_PEGS.sample) }
+    @code = @is_computer ? computer_code : human_code
+  end
+
+  def computer_code
+    code = []
+    4.times { code.push(COLOR_PEGS.sample) }
+    code
+  end
+
+  def human_code
+    print 'Enter a code (ex. RGBY): '
+    input_code
   end
 
   def feedback(guess)
@@ -63,37 +88,55 @@ end
 class Codebreaker < Player
   def guess
     print "#{@name}, what do you think the code is? Enter 4 letters (ex. RGBY) "
-    while (guess = gets.chomp.split(''))
-      break if guess.length == 4 && guess.all? { |value| COLOR_PEGS.include?(value) }
+    @is_computer ? computer_guess : human_guess
+  end
 
-      print 'Invalid input. Enter 4 letters (ex. RGBY) '
-    end
-    guess
+  def computer_guess
+    ['R', 'R', 'R', 'R']
+  end
+
+  def human_guess
+    input_code
   end
 end
 
 class Game
+  NUM_ROUNDS = 2 # must be an even number
+
   def initialize
     @board = Board.new
     @codemaker = Codemaker.new
     @codebreaker = Codebreaker.new
-    @num_rounds = 2 #must be an even number
   end
 
-  def intro
+  def display_intro
     puts "Let's play a game of Mastermind!"
     puts 'The available code options are red, orange, yellow, green, blue, purple. The code can also be empty.'
     puts 'The code is 4 characters in length.'
-    puts "When guessing, enter the capitalized first letter of the color or a 'space'."
-    puts 'For example, a guess of red, green, empty, blue would look like => RG B'
+    puts "When inputting a code, enter the capitalized first letter of the color or a 'space'."
+    puts 'For example, a code of red, green, empty, blue would look like => RG B'
     puts "Let's begin..."
+  end
+
+  def choose_role
+    puts 'Whould you like to start as the codebreaker or the codemaker?'
+    print 'Enter 1 for codebreaker; 2 for codemaker (default: 1) '
+    while (role = gets.chomp)
+      break if role.empty? || (role.length == 1 && ['1', '2'].include?(role))
+
+      print 'Invalid input. Enter 1 for codebreaker; 2 for codemaker (default: 1) '
+    end
+    role == 2 ? @codebreaker.switch_computer_state : @codemaker.switch_computer_state
   end
 
   def set_names
     print 'Who is playing? (default: Human) '
     name = gets.chomp
-    @codebreaker.name = name.empty? ? 'Human' : name
-    @codemaker.name = 'Computer'
+    if @codebreaker.is_computer
+      @codemaker.name = name.empty? ? 'Human' : name
+    else
+      @codebreaker.name = name.empty? ? 'Human' : name
+    end
   end
 
   def play_round
@@ -111,7 +154,7 @@ class Game
     @codemaker.add_point
   end
 
-  def show_score
+  def display_score
     puts "#{@codemaker.name} - #{@codemaker.points} points."
     puts "#{@codebreaker.name} - #{@codebreaker.points} points."
   end
@@ -119,9 +162,15 @@ class Game
   def switch_roles
     @codemaker.name, @codebreaker.name = @codebreaker.name, @codemaker.name
     @codemaker.points, @codebreaker.points = @codebreaker.points, @codemaker.points
+    @codemaker.switch_computer_state
+    @codebreaker.switch_computer_state
   end
 
-  def result
+  def reset_board
+    @board.reset
+  end
+
+  def display_result
     puts "#{@codemaker.name} has #{@codemaker.points} points."
     puts "#{@codebreaker.name} has #{@codebreaker.points} points."
     if @codemaker.points > @codebreaker.points
@@ -134,15 +183,16 @@ class Game
   end
 
   def play
-    intro
+    display_intro
+    choose_role
     set_names
-    @num_rounds.times do
-      show_score
+    NUM_ROUNDS.times do
+      display_score
       play_round
       switch_roles
-      @board.reset
+      reset_board
     end
-    result
+    display_result
   end
 end
 
