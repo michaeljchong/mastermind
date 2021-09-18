@@ -39,8 +39,17 @@ class Codemaker < Player
   end
 
   def feedback(codebreaker_guess)
-    # black keypegs for correct color and location
-    # white keypegs for correct color but not location
+    black_pegs = 0
+    white_pegs = 0
+    @code.each_with_index do |peg, idx|
+      if peg == codebreaker_guess[idx]
+        black_pegs += 1
+      elsif @code.include?(codebreaker_guess[idx])
+        white_pegs += 1
+      end
+    end
+    key_pegs = 'B' * black_pegs + 'W' * white_pegs
+    key_pegs.split('')
   end
 end
 
@@ -73,6 +82,7 @@ end
 #     declare winner
 
 Board.new.display
-player = Codemaker.new("Bob")
-player.generate_code
-p player
+maker = Codemaker.new("Bob")
+maker.generate_code
+p maker
+p maker.feedback(["R", "R", "G", "B"])
