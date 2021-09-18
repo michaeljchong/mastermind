@@ -39,11 +39,6 @@ class Player
 end
 
 class Codemaker < Player
-  def initialize
-    super
-    @code = []
-  end
-
   def generate_code
     @code = []
     4.times { @code.push(COLOR_PEGS.sample) }
@@ -52,10 +47,10 @@ class Codemaker < Player
   def feedback(guess)
     black_pegs = 0
     white_pegs = 0
-    @code.each_with_index do |peg, idx|
-      if peg == guess[idx]
+    guess.each_with_index do |peg, idx|
+      if peg == @code[idx]
         black_pegs += 1
-      elsif @code.include?(guess[idx])
+      elsif guess.include?(@code[idx])
         white_pegs += 1
       end
     end
@@ -122,12 +117,8 @@ class Game
   end
 
   def switch_roles
-    temp_name = @codemaker.name
-    temp_points = @codemaker.points
-    @codemaker.name = @codebreaker.name
-    @codemaker.points = @codebreaker.points
-    @codebreaker.name = temp_name
-    @codebreaker.points = temp_points
+    @codemaker.name, @codebreaker.name = @codebreaker.name, @codemaker.name
+    @codemaker.points, @codebreaker.points = @codebreaker.points, @codemaker.points
   end
 
   def result
