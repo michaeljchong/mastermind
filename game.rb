@@ -1,12 +1,12 @@
 class Board
   def initialize
-    @guess_history = [['R','G','B','Y'], ['R','G','B','Y']]
-    @feedback_history = [['W','W','B','B'], ['B','W','B','B']]
+    @guess_history = []
+    @feedback_history = []
   end
 
   def display
     (0...@guess_history.length).each do |idx|
-      puts "Guess #{idx}: #{@guess_history[idx]} | Key #{idx}: #{@feedback_history[idx]}"
+      puts "Guess #{idx}: #{@guess_history[idx].join} | Key #{idx}: #{@feedback_history[idx].join}"
     end
   end
 
@@ -17,19 +17,30 @@ class Board
   def add_feedback(feedback)
     @feedback_history.push(feedback)
   end
+
+  def reset
+    @guess_history = []
+    @feedback_history = []
+  end
 end
 
 class Player
   COLOR_PEGS = [' ', 'R', 'O', 'Y', 'G', 'B', 'P'] #empty, red, orange, yellow, green, blue, purple
-  def initialize(name)
-    @name = name
+  attr_accessor :name
+  attr_reader :points
+  def initialize
+    @name = ''
     @points = 0
+  end
+
+  def add_point
+    @points += 1
   end
 end
 
 class Codemaker < Player
-  def initialize(name)
-    super(name)
+  def initialize
+    super
     @code = []
   end
 
@@ -47,6 +58,7 @@ class Codemaker < Player
         white_pegs += 1
       end
     end
+    print @code
     key_pegs = 'B' * black_pegs + 'W' * white_pegs
     key_pegs.split('')
   end
@@ -54,7 +66,7 @@ end
 
 class Codebreaker < Player
   def guess
-    print 'What do you think the code is? Enter 4 letters (ex. RGBY) '
+    print "#{@name}, what do you think the code is? Enter 4 letters (ex. RGBY) "
     while (guess = gets.chomp.split(''))
       break if guess.length == 4 && guess.all? { |value| COLOR_PEGS.include?(value) }
 
@@ -64,31 +76,58 @@ class Codebreaker < Player
   end
 end
 
-# Game
-#   initialize
-#     Board
-#     Codemaker
-#     codebreaker
-#     number of rounds
-#     score
-#   play_round
-#     codemaker.generate_code
-#     loop 12 times until correct guess
-#       guess = codebreaker.guess
-#       codemaker.feedback(guess)
-#       return if feedback is 4 black keypegs
-#       increase codemaker score by 1
-#     increase codemaker score by 1
-#   play
-#     loop number of rounds
-#       play_round
-#       switch player roles
-#     declare winner
+class Game
+  def initialize
+    @board = Board.new
+    @codemaker = Codemaker.new
+    @codebreaker = Codebreaker.new
+    @num_rounds = 2 #must be an even number
+  end
 
-Board.new.display
-maker = Codemaker.new("Bob")
-maker.generate_code
-p maker
-p maker.feedback(["R", "R", "G", "B"])
-breaker = Codebreaker.new("Joe")
-breaker.guess
+  def play_round
+    @codemaker.generate_code
+    12.times do
+      guess = @codebreaker.guess
+      @board.add_guess(guess)
+      key_pegs = @codemaker.feedback(guess)
+      @board.add_feedback(key_pegs)
+      @board.display
+      return if key_pegs == ['B', 'B', 'B', 'B']
+
+      @codemaker.add_point
+    end
+    @codemaker.add_point
+  end
+
+  def set_names
+    print 'Who is playing? (default: Human) '
+    name = gets.chomp
+    @codebreaker.name = name.empty? ? 'Human' : name
+    @codemaker.name = 'Computer'
+  end
+
+  def result
+    puts "#{@codemaker.name} has #{@codemaker.points} points."
+    puts "#{@codebreaker.name} has #{@codebreaker.points} points."
+    if @codemaker.points > @codebreaker.points
+      puts "#{@codemaker.name} won!"
+    elsif @codebreaker.points > @codemaker.points
+      puts "#{@codebreaker.name} won!"
+    else
+      puts "It's a draw!"
+    end
+  end
+
+  def play
+    set_names
+    @num_rounds.times do
+      play_round
+      @codemaker, @codebreaker = @codebreaker, @codemaker
+      p @codemaker
+      @board.reset
+    end
+    result
+  end
+end
+
+Game.new.play
