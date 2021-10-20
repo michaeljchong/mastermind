@@ -65,20 +65,16 @@ class Codemaker < Player
     input_code
   end
 
-  def feedback(guess) # white peg count needs to be fixed
+  def feedback(guess)
     black_pegs = 0
     white_pegs = 0
-    guess.each_with_index do |peg, idx|
-      if peg == @code[idx]
-        puts "black: guess - #{peg} | code - #{@code[idx]}"
+    @code.each_with_index do |peg, idx|
+      if peg == guess[idx]
         black_pegs += 1
-      elsif @code.include?(peg)
-        puts "white: guess - #{peg} | code - #{@code[idx]}"
+      elsif guess.include?(peg)
         white_pegs += 1
       end
     end
-
-    print @code # for debugging, remove when finished
     key_pegs = 'B' * black_pegs + 'W' * white_pegs
     key_pegs.split('')
   end
@@ -153,7 +149,7 @@ class Game
 
       print 'Invalid input. Enter a positive, even integer (default: 2) '
     end
-    @num_rounds = rounds.to_i
+    @num_rounds = rounds.empty? ? 2 : rounds.to_i
   end
 
   def play_round
