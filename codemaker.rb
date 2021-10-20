@@ -19,18 +19,14 @@ class Codemaker < Player
   end
 
   def feedback(guess)
-    black_pegs = 0
-    white_pegs = 0
+    temp_code = @code.clone
     guess.each_with_index do |peg, idx|
       if peg == @code[idx]
-        black_pegs += 1
-      elsif @code.include?(peg) # needs to be fixed
-        white_pegs += 1
+        temp_code[idx] = '='
+      elsif temp_code.include?(peg)
+        temp_code[temp_code.index(peg)] = '*'
       end
     end
-
-    print @code # used for debugging
-    key_pegs = 'B' * black_pegs + 'W' * white_pegs
-    key_pegs.split('')
+    ['B' * temp_code.count('='), 'W' * temp_code.count('*')]
   end
 end
