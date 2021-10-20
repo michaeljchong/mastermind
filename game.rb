@@ -1,108 +1,6 @@
-class Board
-  attr_reader :history
-
-  def initialize
-    @history = []
-  end
-
-  def display
-    (0...@history.length).each do |idx|
-      puts "Guess #{idx + 1}: #{@history[idx][0].join} | Key #{idx + 1}: #{@history[idx][1].join}"
-    end
-  end
-
-  def add_history(guess)
-    @history.push(guess)
-  end
-
-  def reset
-    @history = []
-  end
-end
-
-class Player
-  COLOR_PEGS = [' ', 'R', 'O', 'Y', 'G', 'B', 'P'] #empty, red, orange, yellow, green, blue, purple
-  attr_reader :is_computer
-  attr_accessor :name, :points
-
-  def initialize
-    @name = 'Computer'
-    @points = 0
-    @is_computer = TRUE
-  end
-
-  def add_point
-    @points += 1
-  end
-
-  def input_code
-    while (input = gets.chomp.split(''))
-      break if input.length == 4 && input.all? { |value| COLOR_PEGS.include?(value) }
-
-      print 'Invalid input. Enter 4 letters (ex. RGBY) '
-    end
-    input
-  end
-
-  def switch_computer_state
-    @is_computer = @is_computer ? FALSE : TRUE
-  end
-end
-
-class Codemaker < Player
-  def generate_code
-    @code = @is_computer ? computer_code : human_code
-  end
-
-  def computer_code
-    code = []
-    4.times { code.push(COLOR_PEGS.sample) }
-    code
-  end
-
-  def human_code
-    print 'Enter a code (ex. RGBY): '
-    input_code
-  end
-
-  def feedback(guess)
-    black_pegs = 0
-    white_pegs = 0
-    @code.each_with_index do |peg, idx|
-      if peg == guess[idx]
-        black_pegs += 1
-      elsif guess.include?(peg)
-        white_pegs += 1
-      end
-    end
-    key_pegs = 'B' * black_pegs + 'W' * white_pegs
-    key_pegs.split('')
-  end
-end
-
-class Codebreaker < Player
-  def guess(board)
-    @is_computer ? computer_guess(board) : human_guess
-  end
-
-  def computer_guess(board)
-    code = []
-    if board.history.empty?
-      4.times { code.push(COLOR_PEGS.sample) }
-    else
-      previous_guess = board.history[-1][0]
-      previous_key = board.history[-1][1]
-      # guessing algorithm
-    end
-    puts "Computer guessed #{code.join}"
-    code
-  end
-
-  def human_guess
-    print "#{@name}, what do you think the code is? Enter 4 letters (ex. RGBY) "
-    input_code
-  end
-end
+require_relative 'board'
+require_relative 'codemaker'
+require_relative 'codebreaker'
 
 class Game
   def initialize
@@ -145,11 +43,12 @@ class Game
   def set_num_rounds
     print 'How many rounds would you like to play? (must be a positive, even integer to allow for fair gameplay)(default: 2) '
     while (rounds = gets.chomp)
-      break if rounds.empty? || (rounds.to_f >= 2 && (rounds.to_f % 2).zero?)
+      return if rounds.empty?
+      break if rounds.to_f >= 2 && (rounds.to_f % 2).zero?
 
       print 'Invalid input. Enter a positive, even integer (default: 2) '
     end
-    @num_rounds = rounds.empty? ? 2 : rounds.to_i
+    @num_rounds = rounds.to_i
   end
 
   def play_round
@@ -163,7 +62,7 @@ class Game
 
       @codemaker.add_point
     end
-    @codemaker.add_point
+    puts "The code was #{@codemaker.code}"
   end
 
   def display_score
