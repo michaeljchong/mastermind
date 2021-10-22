@@ -6,7 +6,7 @@ class Player
   def initialize
     @name = 'Computer'
     @points = 0
-    @is_computer = TRUE
+    @is_computer = true
   end
 
   def add_point
@@ -23,6 +23,6 @@ class Player
   end
 
   def switch_computer_state
-    @is_computer = @is_computer ? FALSE : TRUE
+    @is_computer = @is_computer ? false : true
   end
 end
