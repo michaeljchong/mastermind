@@ -1,22 +1,22 @@
 require_relative 'player'
 
 class Codebreaker < Player
-  def guess(board)
-    @is_computer ? computer_guess(board) : human_guess
+  def guess(board, code)
+    @is_computer ? computer_guess(board, code) : human_guess
   end
 
-  def computer_guess(board)
-    code = []
+  def computer_guess(board, code)
+    current_guess = []
     if board.history.empty?
-      4.times { code.push(COLOR_PEGS.sample) }
+      4.times { current_guess << COLOR_PEGS.sample }
     else
       previous_guess = board.history[-1][0]
-      previous_key = board.history[-1][1]
-      # implement guessing algorithm
-      puts "#{previous_guess}, #{previous_key}"
+      code.each_with_index do |peg, idx|
+        current_guess.push peg == previous_guess[idx] ? peg : COLOR_PEGS.sample
+      end
     end
-    puts "Computer guessed #{code.join}"
-    code
+    puts "Computer guessed #{current_guess.join}"
+    current_guess
   end
 
   def human_guess

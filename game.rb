@@ -54,14 +54,14 @@ class Game
   def play_round
     @codemaker.generate_code
     12.times do
-      guess = @codebreaker.guess(@board)
+      guess = @codebreaker.guess(@board, @codemaker.code)
       key_pegs = @codemaker.feedback(guess)
       @board.add_history([guess, key_pegs])
       @board.display
-      return if key_pegs == ['B', 'B', 'B', 'B']
-
       @codemaker.add_point
+      return if key_pegs == ['BBBB', '']
     end
+    @codemaker.add_point
     puts "The code was #{@codemaker.code}"
   end
 
